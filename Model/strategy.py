@@ -52,7 +52,7 @@ class Strategy:
             action = trade_book[time_steps[i]]['action']
             X.append(np.r_[state, action])
             next_price = trade_book[time_steps[i+1]]['state']['price']
-            next_position = trade_book[time_steps[i]]['state']['position']
+            next_position = trade_book[time_steps[i+1]]['state']['position']
             next_state = np.array((next_price, next_position))
             next_action = trade_book[time_steps[i+1]]['action']
             next_utility = trade_book[time_steps[i]]['utility']
