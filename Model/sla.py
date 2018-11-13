@@ -1,5 +1,7 @@
 from sklearn.base import clone
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn import ensemble
 import numpy as np
 
 
@@ -8,7 +10,8 @@ class SLA:
     Supervised Learner Averaging
     """
 
-    def __init__(self, sk_regressor=DecisionTreeRegressor()):
+    def __init__(self, sk_regressor=ensemble.GradientBoostingRegressor(n_estimators=500, max_depth=6,
+                                                                       learning_rate = 0.01, loss='ls', min_samples_split=2)):
         """
         initialize an instance of COS learner
         :param sk_regressor:[DecisionTreeRegressor], type of learner for supervised learning

@@ -10,7 +10,7 @@ class Player:
     the player needs to record each step the state and action
     """
 
-    def __init__(self, price_process, utility_function, trading_cost, strategy, gamma = 0.8, action=[-200, -100, 0, 100, 200],
+    def __init__(self, price_process, utility_function, trading_cost, strategy, gamma = 0.999, action=[-200, -100, 0, 100, 200],
                  threshold=(-1000, 1000)):
         """
         initialize an instance of player in the stock market
