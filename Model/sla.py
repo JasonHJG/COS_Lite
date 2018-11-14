@@ -10,13 +10,11 @@ class SLA:
     Supervised Learner Averaging
     """
 
-    def __init__(self, sk_regressor=ensemble.GradientBoostingRegressor(n_estimators=500, max_depth=6,
-                                                                       learning_rate = 0.01, loss='ls', min_samples_split=2)):
+    def __init__(self):
         """
         initialize an instance of COS learner
         :param sk_regressor:[DecisionTreeRegressor], type of learner for supervised learning
         """
-        self.regressor = sk_regressor
         self.supervised_learners = []
 
     def qval(self, state, action):
@@ -50,6 +48,7 @@ class SLA:
         :param X: training features [state, action]
         :param y: training labels [value of state-action function]
         """
-        sl = clone(self.regressor)
+        sl = ensemble.GradientBoostingRegressor(n_estimators=500, max_depth=6,
+                                                learning_rate = 0.01, loss='ls', min_samples_split=2)
         self.supervised_learners.append(sl.fit(X, y))
         print('accuracy is : ',sl.score(X,y))
