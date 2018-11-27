@@ -58,4 +58,3 @@ class Strategy:
             next_utility = trade_book[time_steps[i]]['utility']
             y.append(next_utility + gamma * self.learner.qval(next_state, next_action))
         self.learner.fit(X, y)
-

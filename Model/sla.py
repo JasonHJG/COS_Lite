@@ -13,7 +13,6 @@ class SLA:
     def __init__(self):
         """
         initialize an instance of COS learner
-        :param sk_regressor:[DecisionTreeRegressor], type of learner for supervised learning
         """
         self.supervised_learners = []
 
