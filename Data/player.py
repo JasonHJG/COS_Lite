@@ -10,8 +10,8 @@ class Player:
     the player needs to record each step the state and action
     """
 
-    def __init__(self, price_process, utility_function, trading_cost, strategy, gamma = 0.8, action=[-200, -100, 0, 100, 200],
-                 threshold=(-1000, 1000)):
+    def __init__(self, price_process, utility_function, trading_cost, strategy, gamma = 0.999, action=[-200, -100, 0, 100, 200],
+                 threshold=(-1000, 1000), model='rwm'):
         """
         initialize an instance of player in the stock market
         :param price_process: a price process that mimics the behavior of a stock
@@ -32,6 +32,7 @@ class Player:
         self.trade_book.add_state(time, price, 0) #assume no initial position
         self.utility = {}
         self.threshold = threshold
+        self.model = model
 
     def progress(self):
         """
@@ -62,6 +63,23 @@ class Player:
         dv = next_position * (next_price - price) - self.trading_cost(action)
         utility = self.utility_function(dv)
         self.trade_book.add_utility(time_step, utility)
+        if self.model == 'rwm':
+            best_action = self.feedback_best_action(possible_actions, next_price- price, position)
+            self.strategy.learner.adjust_weight(best_action)
+
+    def feedback_best_action(self, possible_actions, delta_price, postion):
+        """
+        decide which action is the best action
+        :param possible_actions: list of possible action
+        :param delta_price: change in price
+        :param postion: previous position
+        :return: int best action
+        """
+        utility = np.zeros(len(possible_actions))
+        for i in range(len(possible_actions)):
+            dv = (postion + possible_actions[i]) * delta_price - self.trading_cost(possible_actions[i])
+            utility[i] = self.utility_function(dv)
+        return possible_actions[np.argmax(utility)]
 
     def update_strategy(self, look_back=50000, length_of_state=1):
         """

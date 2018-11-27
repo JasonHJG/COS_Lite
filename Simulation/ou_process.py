@@ -36,7 +36,7 @@ class Ornstein_Uhlenbeck:
         """
         move the price process one step forward
         """
-        self.current_x = self.current_x + self.theta * (self.mu - self.current_x) * 1 + \
+        self.current_x = self.current_x + self.theta * (self.mu - self.current_x) + \
                       self.sigma * np.random.normal(0, 1)
         temp_price = round(np.exp(self.current_x) * self.p0, 1)
         if self.range[0] <= temp_price <= self.range[1]:
