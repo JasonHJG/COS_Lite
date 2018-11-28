@@ -1,9 +1,12 @@
 import sys
 import numpy as np
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import time
 
 from Simulation import Ornstein_Uhlenbeck
+from Simulation import Random_mixture_process
 from Simulation import Generic_functions
 from Data import Trade_book
 from Data import Player
@@ -12,25 +15,38 @@ from Model import SLA
 from Model import RWM
 
 def main():
-    ou = Ornstein_Uhlenbeck()
+    ou = Random_mixture_process()
     trade_cost = lambda x: Generic_functions.trading_cost(x, 10, 0.1)
     utility_func = lambda x: Generic_functions.utility_function(x, 0.0001)
 
     sla = SLA()
     rwm = RWM()
-    strat = Strategy(rwm)
+    strat = Strategy(sla)
 
-    p1 = Player(price_process= ou, utility_function=utility_func, trading_cost=trade_cost, strategy=strat, model='rwm')
+    p1 = Player(price_process=ou, utility_function=utility_func, trading_cost=trade_cost, strategy=strat, model='sla')
 
-    size = 50000
-    for j in range(15):
+    size = 10000
+    for j in range(20):
         start = time.time()
         for i in range(size):
             p1.trade_greedy_one_step(.5 * 0.9 ** j)
-        print(p1.strategy.learner.weight)
+
+        dates = list(p1.trade_book.book)[:-1]
+        value_list = []
+        for date in dates:
+            value_list.append(p1.trade_book.book[date]['value'])
+        value_array = np.array(value_list)
+        initial_value = 1000
+        values = np.cumsum(value_array) + initial_value
+        returns = np.diff(values) / values[:-1]
+        print(returns)
+        sharpe = np.mean(returns)/np.std(returns) * np.sqrt(252)
+        print('sharpe ratio is:', sharpe)
+
         p1.update_strategy(size, 1)
         end = time.time()
         print('iteration:',j+1,'time used is', end - start)
+
 
     a = np.linspace(start=0, stop=100, num=41)
     b = []

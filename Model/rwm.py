@@ -34,8 +34,9 @@ class RWM:
         for i in range(len(self.previous_guess)):
             if self.previous_guess[i] != best_possible_action:
                 self.weight[i] = self.weight[i] * self.beta
-        if min(self.weight) < 1e-6:
-            self.weight = self.weight * 1e5
+
+        if min(self.weight) < 1e-9:
+            self.weight = self.weight * 1e9
         # adjust probability
         total_probability = sum(self.weight)
         self.probability = self.weight / total_probability
@@ -84,8 +85,8 @@ class RWM:
         sl = ensemble.GradientBoostingRegressor(n_estimators=500, max_depth=6,
                                                 learning_rate = 0.01, loss='ls', min_samples_split=2)
         self.supervised_learners.append(sl.fit(X, y))
-        if len(self.supervised_learners)>10:
+        if len(self.supervised_learners)>20:
             self.supervised_learners.pop()
-        self.weight = np.ones(len(self.supervised_learners))
+        self.weight = np.ones(len(self.supervised_learners))*1e9
         self.probability = self.weight/(sum(self.weight))
         print('accuracy is : ',sl.score(X,y))

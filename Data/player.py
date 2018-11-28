@@ -10,8 +10,8 @@ class Player:
     the player needs to record each step the state and action
     """
 
-    def __init__(self, price_process, utility_function, trading_cost, strategy, gamma = 0.999, action=[-200, -100, 0, 100, 200],
-                 threshold=(-1000, 1000), model='rwm'):
+    def __init__(self, price_process, utility_function, trading_cost, strategy, gamma = 0.999,
+                 action=[-200, -100, 0, 100, 200], threshold=(-1000, 1000), model='rwm'):
         """
         initialize an instance of player in the stock market
         :param price_process: a price process that mimics the behavior of a stock
@@ -62,6 +62,7 @@ class Player:
         # add player's utility at t
         dv = next_position * (next_price - price) - self.trading_cost(action)
         utility = self.utility_function(dv)
+        self.trade_book.add_value(time_step, dv)
         self.trade_book.add_utility(time_step, utility)
         if self.model == 'rwm':
             best_action = self.feedback_best_action(possible_actions, next_price- price, position)
