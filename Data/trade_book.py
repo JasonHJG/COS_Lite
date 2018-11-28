@@ -23,6 +23,14 @@ class Trade_book:
         position = self.book[recent_time_step]['state']['position']
         return recent_time_step, price, position
 
+    def add_value(self, time_step, value):
+        """
+        add change in value of the portfolio
+        :param time_step: index for time step
+        :param value: change in value of the portfolio
+        """
+        self.book[time_step]['value'] = value
+
     def add_state(self, time_step, price, position):
         """
         record the state to the trade book
