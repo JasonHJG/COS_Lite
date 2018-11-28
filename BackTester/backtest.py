@@ -50,10 +50,10 @@ class BackTester():
         next_position = position + action
         trade_book.add_state(next_time_step, next_price, next_position)
         # add player's value at t
-        #dv = next_position * (next_price - price) - trading_cost(action)
-        #utility = utility_function(dv)
-        #trade_book.add_value(time_step, dv)
-        #trade_book.add_utility(time_step, utility)
+        dv = next_position * (next_price - price) - trading_cost(action)
+        utility = utility_function(dv)
+        trade_book.add_value(time_step, dv)
+        trade_book.add_utility(time_step, utility)
 
 
     def backtest(self, total_time=None, initial_value=1e5, threshold=None, action=None, ):
@@ -97,7 +97,8 @@ class BackTester():
         # note that action is made based on current price
         d_cash = (df_trade.price.shift() * df_trade.position.diff()).fillna(0) + df_trade.trading_cost
         df_trade.loc[:, "cash"] = initial_value - d_cash.cumsum()
-        df_trade.loc[:, "value"] = df_trade.loc[:, "stock"] + df_trade.loc[:, "cash"]
+        #df_trade.loc[:, "value"] = df_trade.loc[:, "stock"] + df_trade.loc[:, "cash"]
+        df_trade.loc[:, "value"] = pd.Series([book[i].get('value', np.nan) for i in sorted(list(book))]).fillna(0).cumsum() + initial_value
 
         self.df_trade = df_trade
 
