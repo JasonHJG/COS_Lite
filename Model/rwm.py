@@ -10,7 +10,7 @@ class RWM:
     randomized weighted majority
     """
 
-    def __init__(self, beta = 0.8):
+    def __init__(self, beta = 0.999):
         """
         initialize an instance of randomized weighted majority learner
         :param beta: [0.8], penalty for wrong guess
@@ -34,7 +34,6 @@ class RWM:
         for i in range(len(self.previous_guess)):
             if self.previous_guess[i] != best_possible_action:
                 self.weight[i] = self.weight[i] * self.beta
-
         if min(self.weight) < 1e-9:
             self.weight = self.weight * 1e9
         # adjust probability

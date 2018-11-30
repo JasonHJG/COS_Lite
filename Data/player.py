@@ -65,8 +65,12 @@ class Player:
         self.trade_book.add_value(time_step, dv)
         self.trade_book.add_utility(time_step, utility)
         if self.model == 'rwm':
-            best_action = self.feedback_best_action(possible_actions, next_price- price, position)
-            self.strategy.learner.adjust_weight(best_action)
+            # todo: should use the learners' action as possible actions
+            # todo: implement the method to find possible action from leaners
+            action_list = self.strategy.learner.previous_guess
+            if action_list is not None:
+                best_action = self.feedback_best_action(action_list, next_price - price, position)
+                self.strategy.learner.adjust_weight(best_action)
 
     def feedback_best_action(self, possible_actions, delta_price, postion):
         """

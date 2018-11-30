@@ -44,7 +44,7 @@ class Strategy:
         time_steps.sort()
         X = []
         y = []
-        print(len(time_steps))
+        print('length of time span:',len(time_steps))
         for i in range(len(time_steps)-2):
             price = trade_book[time_steps[i]]['state']['price']
             position = trade_book[time_steps[i]]['state']['position']
