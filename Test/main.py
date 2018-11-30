@@ -15,22 +15,22 @@ from Model import SLA
 from Model import RWM
 
 def main():
-    np.random.seed(1023)
+    np.random.seed(10)
     ou = Random_mixture_process(prob_list=[.5, .5])
     trade_cost = lambda x: Generic_functions.trading_cost(x, 10, 0.1)
     utility_func = lambda x: Generic_functions.utility_function(x, 0.0001)
 
     sla = SLA()
     rwm = RWM()
-    strat = Strategy(rwm)
+    strat = Strategy(sla)
 
-    p1 = Player(price_process=ou, utility_function=utility_func, trading_cost=trade_cost, strategy=strat, model='rwm')
+    p1 = Player(price_process=ou, utility_function=utility_func, trading_cost=trade_cost, strategy=strat, model='sla')
 
-    size = 10000
-    for j in range(10):
+    size = 1000
+    for j in range(30):
         start = time.time()
         for i in range(size):
-            p1.trade_greedy_one_step(.5 * 0.9 ** j)
+            p1.trade_greedy_one_step(.9 * 0.9 ** j)
 
         dates = list(p1.trade_book.book)[:-1]
         value_list = []
@@ -44,7 +44,7 @@ def main():
 
         print('sharpe ratio is:', sharpe)
 
-        print('weight is:', p1.strategy.learner.weight)
+        #print('weight is:', p1.strategy.learner.weight)
         p1.update_strategy(size, 1)
         end = time.time()
         print('iteration:',j+1,'time used is', end - start)

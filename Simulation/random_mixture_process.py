@@ -6,7 +6,7 @@ class Random_mixture_process:
     random mixture of several price processes
     """
     def __init__(self, prob_list = [0.8, 0.2], start_t = 0, p0 = 50, range = [0,100],
-                 theta=np.log(2) / 5, mu=0, sigma=.15, r = 0.05/ 252, s = 0.2 / 17, threshold = 10000):
+                 theta=np.log(2) / 5, mu=0, sigma=.15, r = 0.1, s = 0.05, threshold = 1000):
         self.mu = mu
         self.sigma = sigma
         self.theta = theta
@@ -54,5 +54,6 @@ class Random_mixture_process:
         else: #GBM
             current_price = self.current_price
             next_price = current_price + self.r * current_price + self.s * current_price * np.random.normal(0, 1)
+            if self.range[0] <= next_price <= self.range[1]:
+                self.current_price = next_price
             self.current_t += 1
-            self.current_price = next_price

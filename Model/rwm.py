@@ -10,7 +10,7 @@ class RWM:
     randomized weighted majority
     """
 
-    def __init__(self, beta = 0.999):
+    def __init__(self, beta = 0.9):
         """
         initialize an instance of randomized weighted majority learner
         :param beta: [0.8], penalty for wrong guess
@@ -34,8 +34,10 @@ class RWM:
         for i in range(len(self.previous_guess)):
             if self.previous_guess[i] != best_possible_action:
                 self.weight[i] = self.weight[i] * self.beta
-        if min(self.weight) < 1e-9:
-            self.weight = self.weight * 1e9
+        if max(self.weight)/min(self.weight) > 1e5:
+            self.weight = np.ones(len(self.weight))
+        if min(self.weight)<1e-8:
+            self.weight *= 1e8
         # adjust probability
         total_probability = sum(self.weight)
         self.probability = self.weight / total_probability
@@ -86,6 +88,6 @@ class RWM:
         self.supervised_learners.append(sl.fit(X, y))
         if len(self.supervised_learners)>20:
             self.supervised_learners.pop()
-        self.weight = np.ones(len(self.supervised_learners))*1e9
+        self.weight = np.ones(len(self.supervised_learners))
         self.probability = self.weight/(sum(self.weight))
         print('accuracy is : ',sl.score(X,y))
