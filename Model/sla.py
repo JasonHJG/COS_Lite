@@ -3,6 +3,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import ensemble
 import numpy as np
+from collections import deque
 
 
 class SLA:
@@ -14,7 +15,7 @@ class SLA:
         """
         initialize an instance of COS learner
         """
-        self.supervised_learners = []
+        self.supervised_learners = deque()
 
     def qval(self, state, action):
         """
@@ -47,7 +48,12 @@ class SLA:
         :param X: training features [state, action]
         :param y: training labels [value of state-action function]
         """
-        sl = ensemble.GradientBoostingRegressor(n_estimators=500, max_depth=6,
+        if len(self.supervised_learners)>=20:
+            print('enough learner, stop training')
+            pass
+        else:
+            sl = ensemble.GradientBoostingRegressor(n_estimators=500, max_depth=6,
                                                 learning_rate = 0.01, loss='ls', min_samples_split=2)
-        self.supervised_learners.append(sl.fit(X, y))
-        print('accuracy is : ',sl.score(X,y))
+            self.supervised_learners.append(sl.fit(X, y))
+            print('accuracy is : ', sl.score(X, y))
+

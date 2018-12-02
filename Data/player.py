@@ -71,6 +71,8 @@ class Player:
             if action_list is not None:
                 best_action = self.feedback_best_action(action_list, next_price - price, position)
                 self.strategy.learner.adjust_weight(best_action)
+            #best_action = self.feedback_best_action(possible_actions, next_price - price, position)
+            #self.strategy.learner.adjust_weight(best_action)
 
     def feedback_best_action(self, possible_actions, delta_price, postion):
         """

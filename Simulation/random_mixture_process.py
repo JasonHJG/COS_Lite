@@ -5,8 +5,8 @@ class Random_mixture_process:
     """
     random mixture of several price processes
     """
-    def __init__(self, prob_list = [0.8, 0.2], start_t = 0, p0 = 50, range = [0,100],
-                 theta=np.log(2) / 5, mu=0, sigma=.15, r = 0.1, s = 0.05, threshold = 1000):
+    def __init__(self, prob_list = [.5, .2, .3], start_t = 0, p0 = 50, range = [5,100],
+                 theta=np.log(2) / 5, mu=0, sigma=.15, r = 0.1, s = 0.1, threshold = 1000):
         self.mu = mu
         self.sigma = sigma
         self.theta = theta
@@ -30,10 +30,10 @@ class Random_mixture_process:
         """
         change the market regime once time reaches threshold
         """
-        rand = np.random.random()
-        if 0<self.prob_list[0] + rand<1:
-            self.prob_list[0] = self.prob_list[0] + rand
-            self.prob_list[1] = 1 - self.prob_list[0]
+        rand = np.random.normal(0, 0.1, 3)
+        new_prob = self.prob_list + (rand-np.sum(rand)/3)
+        if np.min(new_prob)>0:
+            self.prob_list = new_prob
 
     def move_forward(self):
         """
@@ -42,7 +42,7 @@ class Random_mixture_process:
         if self.current_t%self.threshold == 0:
             self.change()
 
-        indicator = np.random.choice([0,1], p = self.prob_list)
+        indicator = np.random.choice([0,1,2], p = self.prob_list)
         if indicator == 0: # OU process
             current_x = np.log(self.current_price / self.p0)
             current_x = current_x + self.theta * (self.mu - current_x) + self.sigma * np.random.normal(0, 1)
@@ -51,9 +51,16 @@ class Random_mixture_process:
                 self.current_price = temp_price
             self.current_t += 1
 
-        else: #GBM
+        elif indicator == 1 : #GBM + drift
             current_price = self.current_price
             next_price = current_price + self.r * current_price + self.s * current_price * np.random.normal(0, 1)
+            if self.range[0] <= next_price <= self.range[1]:
+                self.current_price = next_price
+            self.current_t += 1
+
+        elif indicator == 2:  # GBM - drift
+            current_price = self.current_price
+            next_price = current_price - self.r * current_price + self.s * current_price * np.random.normal(0, 1)
             if self.range[0] <= next_price <= self.range[1]:
                 self.current_price = next_price
             self.current_t += 1
