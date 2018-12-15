@@ -12,6 +12,7 @@ from Data import Player
 from Model import Strategy
 from Model import SLA
 from Model import RWM
+from Model import FTPL
 import pandas as pd
 import seaborn as sns
 from scipy import stats
@@ -19,18 +20,21 @@ from scipy import stats
 
 def main():
     np.random.seed(10)
-    ou = Random_mixture_process(prob_list=[.5, .3, .2])
+    #ou = Random_mixture_process(p0=70, prob_list=[.25, .25, .25, .25])
+    ou = Ornstein_Uhlenbeck()
     trade_cost = lambda x: Generic_functions.trading_cost(x, 10, 0.1)
     utility_func = lambda x: Generic_functions.utility_function(x, 0.0001)
 
     sla = SLA()
     rwm = RWM()
-    strat_1 = Strategy(rwm)
-    strat_2 = Strategy(sla)
+    ftpl = FTPL()
+    strat_1 = Strategy(sla)
+    strat_2 = Strategy(rwm)
+    strat_3 = Strategy(ftpl)
 
-    p1 = Player(price_process=ou, utility_function=utility_func, trading_cost=trade_cost, strategy=strat_2, model='sla')
+    p1 = Player(price_process=ou, utility_function=utility_func, trading_cost=trade_cost, strategy=strat_3, model='ftpl')
 
-    size = 10000
+    size = 1000
     for j in range(20):
         start = time.time()
         for i in range(size):
@@ -55,14 +59,14 @@ def main():
     # todo: generate many other price process and compute the sharpe
     p1.trade_book.clear()
     pnl = []
-    initial_price = 50
+    initial_price = 60
     initial_time = 0
     p1.trade_book.add_state(initial_time, initial_price, 0)
     start = 0
-    test_size = 3000
+    test_size = 1000
     while start != 200:
         print('iteration:', start+1)
-        test_process = Random_mixture_process(prob_list=[.5, .3, .2],p0 = initial_price, start_t= initial_time)
+        test_process = Random_mixture_process(prob_list=[.25, .25, .25, .25], p0 = initial_price, start_t= initial_time)
         p1.price_process = test_process
         for j in range(test_size):
             p1.trade_greedy_one_step(0.01)
@@ -77,7 +81,8 @@ def main():
         pnl.append(sharpe)
         p1.update_strategy(test_size, 1)
         start += 1
-        initial_time, initial_price = p1.price_process.get_current_price()
+        initial_time, _ = p1.price_process.get_current_price()
+
 
     plt.figure()
     sns.distplot(pnl)

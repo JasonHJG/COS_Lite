@@ -6,21 +6,20 @@ import numpy as np
 from collections import deque
 
 
-class RWM:
+class FTPL:
     """
-    randomized weighted majority
+    follow the perturbed leader
     """
 
-    def __init__(self, beta = .995):
+    def __init__(self, eps = 0.05, limit = 20):
         """
         initialize an instance of randomized weighted majority learner
-        :param beta: [0.8], penalty for wrong guess
         """
         self.supervised_learners = deque()
         self.weight = None
         self.probability = None
         self.previous_guess = None
-        self.beta = beta
+        self.eps = eps
 
     def adjust_weight(self, utility_array):
         """
@@ -31,21 +30,15 @@ class RWM:
         if self.weight is None or len(self.weight) == 1:
             return
 
-        # adjust weight
-        best_performance = np.amax(utility_array)
+        # adjust weight, now weight is associated with penalty
+        mean_performance = np.mean(utility_array)
         for i in range(len(self.previous_guess)):
-            if utility_array[i] < 0:
-                self.weight[i] = self.weight[i] * self.beta
-
-        if min(self.weight) < 1e-8:
-            self.weight *= 1e8
-        # adjust probability
-        total_probability = sum(self.weight)
-        self.probability = self.weight / total_probability
+            if utility_array[i] <= mean_performance:
+                self.weight[i] += np.abs(utility_array[i])
 
     def qval(self, state, one_action):
         """
-        compute q values for state, action with randomized weighted majority
+        compute q values for state, action with follow the perturbed leader
         :param state: a list of values
         :param one_action: one action
         :return the value for state-action function
@@ -54,9 +47,16 @@ class RWM:
             return 0.
 
         x = np.r_[state, one_action].reshape((1,-1))
-        learner_number = np.arange(len(self.supervised_learners))
-        learner_id = np.random.choice(learner_number, p=self.probability)
-        return self.supervised_learners[learner_id].predict(x)
+        perturbed_w = self.weight + np.random.uniform(0, 1/self.eps, len(self.weight))
+        #learner_id = np.argmin(perturbed_w)
+        # todo: test if use top 25% is an good idea
+        learner_id = np.argsort(perturbed_w)
+        q_value = 0
+        for i in range(int(np.ceil(0.25 * len(learner_id)))):
+            q_value += self.supervised_learners[learner_id[i]].predict(x)
+        return q_value/int(np.ceil(0.25 * len(learner_id)))
+
+        #return self.supervised_learners[learner_id].predict(x)
 
     def predict(self, state, possible_actions):
         """
@@ -74,9 +74,12 @@ class RWM:
                 x = np.r_[state, possible_actions[j]].reshape((1,-1))
                 state_action_values[j] = self.supervised_learners[i].predict(x)
             self.previous_guess[i] = possible_actions[np.argmax(state_action_values)]
-        learner_list = np.arange(len(self.supervised_learners))
-        learner_id = np.random.choice(learner_list, p = self.probability)
-        return self.previous_guess[learner_id]
+        perturbed_w = self.weight + np.random.uniform(0, 1 / self.eps, len(self.weight))
+        learner_id = np.argsort(perturbed_w)
+        action = 0
+        for i in range(int(np.ceil(0.25 * len(learner_id)))):
+            action += self.previous_guess[learner_id[i]]
+        return action /  int(np.ceil(0.25 * len(learner_id)))
 
     def fit(self, X, y):
         """
@@ -86,7 +89,7 @@ class RWM:
         """
 
         if len(self.supervised_learners)>=15:
-            print('enough rwm learners, stop training')
+            print('enough ftpl learners, stop training')
             self.weight = np.ones(len(self.supervised_learners))
             self.probability = self.weight / (sum(self.weight))
         else:
@@ -95,5 +98,5 @@ class RWM:
                                                 learning_rate = 0.01, loss='ls', min_samples_split=2)
             self.supervised_learners.append(sl.fit(X, y))
             self.weight = np.ones(len(self.supervised_learners))
-            self.probability = self.weight/(sum(self.weight))
+            self.active_weight = self.weight
             print('accuracy is : ',sl.score(X,y))

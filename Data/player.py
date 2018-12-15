@@ -69,10 +69,17 @@ class Player:
             # todo: implement the method to find possible action from leaners
             action_list = self.strategy.learner.previous_guess
             if action_list is not None:
-                best_action = self.feedback_best_action(action_list, next_price - price, position)
-                self.strategy.learner.adjust_weight(best_action)
-            #best_action = self.feedback_best_action(possible_actions, next_price - price, position)
-            #self.strategy.learner.adjust_weight(best_action)
+                _, utility_array = self.feedback_best_action(action_list, next_price - price, position)
+                self.strategy.learner.adjust_weight(utility_array)
+
+        if self.model == 'ftpl':
+            # todo: find best utility and other utility
+            # todo: use utility as loss function
+            action_list = self.strategy.learner.previous_guess
+            if action_list is not None:
+                _, utility_array = self.feedback_best_action(action_list, next_price - price, position)
+                self.strategy.learner.adjust_weight(utility_array)
+
 
     def feedback_best_action(self, possible_actions, delta_price, postion):
         """
@@ -86,7 +93,7 @@ class Player:
         for i in range(len(possible_actions)):
             dv = (postion + possible_actions[i]) * delta_price - self.trading_cost(possible_actions[i])
             utility[i] = self.utility_function(dv)
-        return possible_actions[np.argmax(utility)]
+        return possible_actions[np.argmax(utility)], utility
 
     def update_strategy(self, look_back=50000, length_of_state=1):
         """

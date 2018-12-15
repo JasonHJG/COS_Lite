@@ -48,9 +48,9 @@ class SLA:
         :param X: training features [state, action]
         :param y: training labels [value of state-action function]
         """
-        if len(self.supervised_learners)>=20:
-            print('enough learner, stop training')
-            pass
+        if len(self.supervised_learners) >= 15:
+            #self.supervised_learners.popleft()
+            print('enough sla learner')
         else:
             sl = ensemble.GradientBoostingRegressor(n_estimators=500, max_depth=6,
                                                 learning_rate = 0.01, loss='ls', min_samples_split=2)
