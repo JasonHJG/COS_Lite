@@ -20,8 +20,8 @@ from scipy import stats
 
 def main():
     np.random.seed(10)
-    #ou = Random_mixture_process(p0=70, prob_list=[.25, .25, .25, .25])
-    ou = Ornstein_Uhlenbeck()
+    ou = Random_mixture_process(p0=70, prob_list=[.25, .25, .25, .25])
+    #ou = Ornstein_Uhlenbeck()
     trade_cost = lambda x: Generic_functions.trading_cost(x, 10, 0.1)
     utility_func = lambda x: Generic_functions.utility_function(x, 0.0001)
 
@@ -59,7 +59,7 @@ def main():
     # todo: generate many other price process and compute the sharpe
     p1.trade_book.clear()
     pnl = []
-    initial_price = 60
+    initial_price = 50
     initial_time = 0
     p1.trade_book.add_state(initial_time, initial_price, 0)
     start = 0

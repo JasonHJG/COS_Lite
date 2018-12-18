@@ -48,7 +48,7 @@ class SLA:
         :param X: training features [state, action]
         :param y: training labels [value of state-action function]
         """
-        if len(self.supervised_learners) >= 15:
+        if len(self.supervised_learners) >= 30:
             #self.supervised_learners.popleft()
             print('enough sla learner')
         else:

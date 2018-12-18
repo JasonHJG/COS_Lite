@@ -52,9 +52,9 @@ class FTPL:
         # todo: test if use top 25% is an good idea
         learner_id = np.argsort(perturbed_w)
         q_value = 0
-        for i in range(int(np.ceil(0.25 * len(learner_id)))):
+        for i in range(int(np.ceil(0.5 * len(learner_id)))):
             q_value += self.supervised_learners[learner_id[i]].predict(x)
-        return q_value/int(np.ceil(0.25 * len(learner_id)))
+        return q_value/int(np.ceil(0.5 * len(learner_id)))
 
         #return self.supervised_learners[learner_id].predict(x)
 
@@ -76,10 +76,22 @@ class FTPL:
             self.previous_guess[i] = possible_actions[np.argmax(state_action_values)]
         perturbed_w = self.weight + np.random.uniform(0, 1 / self.eps, len(self.weight))
         learner_id = np.argsort(perturbed_w)
+        # todo: possible modification
+        # todo: average the top 25%'s q function
+
+        q_value_array = np.zeros(len(possible_actions))
+        for i in range(len(possible_actions)):
+            x = np.r_[state, possible_actions[i]].reshape((1, -1))
+            for j in range(int(np.ceil(0.5 * len(learner_id)))):
+                q_value_array[i] += self.supervised_learners[learner_id[j]].predict(x)
+        return possible_actions[np.argmax(q_value_array)]
+        """
         action = 0
         for i in range(int(np.ceil(0.25 * len(learner_id)))):
             action += self.previous_guess[learner_id[i]]
         return action /  int(np.ceil(0.25 * len(learner_id)))
+        """
+
 
     def fit(self, X, y):
         """
